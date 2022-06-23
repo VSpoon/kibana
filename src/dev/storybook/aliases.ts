@@ -42,4 +42,5 @@ export const storybookAliases = {
   threat_intelligence: 'x-pack/plugins/threat_intelligence/.storybook',
   ui_actions_enhanced: 'src/plugins/ui_actions_enhanced/.storybook',
   unified_search: 'src/plugins/unified_search/.storybook',
+  core_chrome: 'src/core/public/chrome/.storybook',
 };

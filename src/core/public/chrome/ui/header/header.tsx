@@ -48,6 +48,7 @@ import { HeaderNavControls } from './header_nav_controls';
 import { HeaderActionMenu } from './header_action_menu';
 import { HeaderExtension } from './header_extension';
 import { HeaderTopBanner } from './header_top_banner';
+import { HeaderOnboardingButton } from './header_onboarding_button';
 
 export interface HeaderProps {
   kibanaVersion: string;
@@ -140,6 +141,7 @@ export function Header({
                   <EuiHideFor sizes={['m', 'l', 'xl']}>
                     <HeaderNavControls navControls$={observables.navControlsCenter$} />
                   </EuiHideFor>,
+                  <HeaderOnboardingButton />,
                   <HeaderHelpMenu
                     helpExtension$={observables.helpExtension$}
                     helpSupportUrl$={observables.helpSupportUrl$}
