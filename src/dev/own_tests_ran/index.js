@@ -36,9 +36,7 @@ blah blah blah
 async function process({ flags, log }) {
   log.info('\n### Running runCheckOwnTestsRanCli()');
 
-  const isTestWith = isTest(
-    testDirectoryRegexes('src/dev/own_tests_ran/test_roots.yml')
-  );
+  const isTestWith = isTest(testDirectoryRegexes('src/dev/own_tests_ran/test_roots.yml'));
 
   from(flags.mock ? mockData() : await getPrChanges())
     .pipe(
