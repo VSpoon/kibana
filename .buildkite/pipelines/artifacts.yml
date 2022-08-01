@@ -75,7 +75,7 @@ steps:
   - command: .buildkite/scripts/steps/artifacts/cloud.sh
     label: 'Cloud Deployment'
     soft_fail:
-      exit_status: 130
+      - exit_status: 130
     agents:
       queue: n2-2
     timeout_in_minutes: 30
