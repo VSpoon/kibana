@@ -7,17 +7,24 @@
 
 import { SavedObjectsType } from '@kbn/core/server';
 
-export const guidedSetup: SavedObjectsType = {
-  name: 'guided_setup',
+export const guidedSetupSavedObjectsType = 'GUIDED_SETUP_SAVED_OBJECTS_TYPE';
+export const guidedSetupSavedObjectsId = 'GUIDED_SETUP_SAVED_OBJECTS_ID';
+export const guidedSetupDefaultState = {
+  active_guide: 'security',
+  active_step: 0,
+};
+export const guidedSetupSavedObjects: SavedObjectsType = {
+  name: guidedSetupSavedObjectsType,
   hidden: false,
-  namespaceType: 'multiple-isolated',
+  // make it available in all spaces for now
+  namespaceType: 'agnostic',
   mappings: {
     dynamic: false,
     properties: {
-      description: {
-        type: 'text',
+      active_guide: {
+        type: 'keyword',
       },
-      hits: {
+      active_step: {
         type: 'integer',
       },
     },

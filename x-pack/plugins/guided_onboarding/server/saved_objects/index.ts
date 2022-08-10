@@ -5,4 +5,9 @@
  * 2.0.
  */
 
-export { guidedSetup } from './guided_setup';
+export {
+  guidedSetupSavedObjects,
+  guidedSetupSavedObjectsType,
+  guidedSetupSavedObjectsId,
+  guidedSetupDefaultState,
+} from './guided_setup';

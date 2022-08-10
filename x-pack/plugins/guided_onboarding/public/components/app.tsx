@@ -1,3 +1,10 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, I18nProvider } from '@kbn/i18n-react';
@@ -16,8 +23,8 @@ import {
   EuiText,
 } from '@elastic/eui';
 
-import { CoreStart } from '../../../../../src/core/public';
-import { NavigationPublicPluginStart } from '../../../../../src/plugins/navigation/public';
+import { CoreStart } from '@kbn/core/public';
+import { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
 
 import { PLUGIN_ID, PLUGIN_NAME } from '../../common';
 
@@ -35,19 +42,39 @@ export const GuidedOnboardingApp = ({
   navigation,
 }: GuidedOnboardingAppDeps) => {
   // Use React hooks to manage state.
-  const [timestamp, setTimestamp] = useState<string | undefined>();
+  const [guidedOnboardingState, setGuidedOnboardingState] = useState<string | undefined>();
 
   const onClickHandler = () => {
     // Use the core http service to make a response to the server API.
-    http.get('/api/guided_onboarding/example').then((res) => {
-      setTimestamp(res.time);
+    http.get('/api/guided_onboarding/state').then((res) => {
       // Use the core notifications service to display a success message.
       notifications.toasts.addSuccess(
         i18n.translate('guidedOnboarding.dataUpdated', {
-          defaultMessage: 'Data updated',
+          defaultMessage: 'Data loaded',
         })
       );
+      setGuidedOnboardingState(JSON.stringify(res, null, 2));
     });
+  };
+
+  const sendUpdateRequest = () => {
+    // Use the core http service to make a response to the server API.
+    http
+      .put('/api/guided_onboarding/state', {
+        body: JSON.stringify({
+          active_guide: 'observability',
+          active_step: 1,
+        }),
+      })
+      .then((res) => {
+        // Use the core notifications service to display a success message.
+        notifications.toasts.addSuccess(
+          i18n.translate('guidedOnboarding.dataUpdated', {
+            defaultMessage: 'Data updated',
+          })
+        );
+        setGuidedOnboardingState(JSON.stringify(res, null, 2));
+      });
   };
 
   // Render the application DOM.
@@ -97,14 +124,21 @@ export const GuidedOnboardingApp = ({
                     <p>
                       <FormattedMessage
                         id="guidedOnboarding.timestampText"
-                        defaultMessage="Last timestamp: {time}"
-                        values={{ time: timestamp ? timestamp : 'Unknown' }}
+                        defaultMessage="State: {state}"
+                        values={{ state: guidedOnboardingState ?? 'Unknown' }}
                       />
                     </p>
                     <EuiButton type="primary" size="s" onClick={onClickHandler}>
                       <FormattedMessage
                         id="guidedOnboarding.buttonText"
                         defaultMessage="Get data"
+                      />
+                    </EuiButton>
+
+                    <EuiButton type="secondary" size="s" onClick={sendUpdateRequest}>
+                      <FormattedMessage
+                        id="guidedOnboarding.buttonText"
+                        defaultMessage="Update data"
                       />
                     </EuiButton>
                   </EuiText>

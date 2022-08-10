@@ -9,7 +9,7 @@ import { PluginInitializerContext, CoreSetup, CoreStart, Plugin, Logger } from '
 
 import { GuidedOnboardingPluginSetup, GuidedOnboardingPluginStart } from './types';
 import { defineRoutes } from './routes';
-import { guidedSetup } from './saved_objects';
+import { guidedSetupSavedObjects } from './saved_objects';
 
 export class GuidedOnboardingPlugin
   implements Plugin<GuidedOnboardingPluginSetup, GuidedOnboardingPluginStart>
@@ -28,7 +28,7 @@ export class GuidedOnboardingPlugin
     defineRoutes(router);
 
     // register saved objects
-    core.savedObjects.registerType(guidedSetup);
+    core.savedObjects.registerType(guidedSetupSavedObjects);
 
     return {};
   }
