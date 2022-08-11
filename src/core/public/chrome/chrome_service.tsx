@@ -226,6 +226,7 @@ export class ChromeService {
           navControlsRight$={navControls.getRight$()}
           onIsLockedUpdate={setIsNavDrawerLocked}
           isLocked$={getIsNavDrawerLocked$}
+          http={http}
         />
       ),
 

@@ -26,8 +26,9 @@ import {
   useEuiTheme,
   EuiButtonEmpty,
   EuiTitle,
-  EuiCard,
 } from '@elastic/eui';
+
+import type { HttpStart } from '@kbn/core-http-browser';
 
 type OnboardingGuide = 'observability' | 'security' | 'search';
 
@@ -69,10 +70,16 @@ const onboardingSteps: OnboardingSteps[] = [
   },
 ];
 
-export const HeaderOnboardingButton = ({}) => {
+export const HeaderOnboardingButton = ({ http }: { http: HttpStart }) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-  const [selectedGuide, setSelectedGuide] = useState<OnboardingGuide | undefined>(undefined);
+  const [activeGuide, setActiveGuide] = useState<OnboardingGuide | undefined>(undefined);
 
+  console.log({ http });
+  http.get('/api/guided_onboarding/state').then((res) => {
+    // Use the core notifications service to display a success message.
+
+    setActiveGuide(res.state.active_guide);
+  });
   const { euiTheme } = useEuiTheme();
 
   const togglePopover = () => {
@@ -104,6 +111,7 @@ export const HeaderOnboardingButton = ({}) => {
           onClick={togglePopover}
           color="success"
           fill
+          isDisabled={!activeGuide}
         >
           Guided setup
         </EuiButton>
@@ -112,116 +120,74 @@ export const HeaderOnboardingButton = ({}) => {
       closePopover={() => setIsPopoverOpen(false)}
       anchorPosition="downCenter"
     >
-      {selectedGuide ? (
-        <>
-          <EuiPopoverTitle>
-            <EuiFlexGroup direction="column" gutterSize="s" alignItems="baseline">
-              <EuiFlexItem grow={false}>
-                <EuiButtonEmpty
-                  onClick={() => setSelectedGuide(undefined)}
-                  iconSide="left"
-                  iconType="arrowLeft"
-                >
-                  Back to guides
-                </EuiButtonEmpty>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiTitle size="s">
-                  <h3>Observe my infrastructure</h3>
-                </EuiTitle>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiPopoverTitle>
+      <EuiPopoverTitle>
+        <EuiFlexGroup direction="column" gutterSize="s" alignItems="baseline">
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty
+              onClick={() => {}}
+              iconSide="left"
+              iconType="arrowLeft"
+              isDisabled={true}
+            >
+              Back to guides
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiTitle size="s">
+              <h3>Guide for {activeGuide}</h3>
+            </EuiTitle>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiPopoverTitle>
 
-          <div css={popoverContainerCss}>
-            <EuiText>
-              <p>
-                {`We'll help you quickly gain visibility into your environment using Elastic's
+      <div css={popoverContainerCss}>
+        <EuiText>
+          <p>
+            {`We'll help you quickly gain visibility into your environment using Elastic's
             out-of-the-box integrations. Gain deep insights from your logs, metrics, and traces, and
             proactively detect issues and take action.`}
-              </p>
-            </EuiText>
-            <EuiSpacer />
-            <EuiProgress label="Progress" value={40} max={100} size="l" valueText />
-            <EuiSpacer />
-            {onboardingSteps.map((step, index) => {
-              const accordionId = htmlIdGenerator(`accordion${index}`)();
+          </p>
+        </EuiText>
+        <EuiSpacer />
+        <EuiProgress label="Progress" value={40} max={100} size="l" valueText />
+        <EuiSpacer />
+        {onboardingSteps.map((step, index) => {
+          const accordionId = htmlIdGenerator(`accordion${index}`)();
 
-              const buttonContent = (
-                <EuiFlexGroup gutterSize="s">
-                  <EuiFlexItem grow={false}>
-                    <span css={statusCircleCss({ status: step.status })} className="eui-textCenter">
-                      <span className="euiScreenReaderOnly">{step.status}</span>
-                      {step.status === 'complete' && <EuiIcon type="check" color="white" />}
-                    </span>
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>{step.title}</EuiFlexItem>
-                </EuiFlexGroup>
-              );
+          const buttonContent = (
+            <EuiFlexGroup gutterSize="s">
+              <EuiFlexItem grow={false}>
+                <span css={statusCircleCss({ status: step.status })} className="eui-textCenter">
+                  <span className="euiScreenReaderOnly">{step.status}</span>
+                  {step.status === 'complete' && <EuiIcon type="check" color="white" />}
+                </span>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>{step.title}</EuiFlexItem>
+            </EuiFlexGroup>
+          );
 
-              return (
-                <div>
-                  <EuiAccordion id={accordionId} buttonContent={buttonContent} arrowDisplay="right">
-                    <>
-                      <EuiSpacer size="s" />
-                      <EuiText size="s">{step.description}</EuiText>
-                    </>
-                  </EuiAccordion>
+          return (
+            <div>
+              <EuiAccordion id={accordionId} buttonContent={buttonContent} arrowDisplay="right">
+                <>
+                  <EuiSpacer size="s" />
+                  <EuiText size="s">{step.description}</EuiText>
+                </>
+              </EuiAccordion>
 
-                  {/* Do not show horizontal rule for last item */}
-                  {onboardingSteps.length - 1 !== index && <EuiHorizontalRule />}
-                </div>
-              );
-            })}
-            <EuiPopoverFooter>
-              <EuiText size="xs" textAlign="center">
-                <EuiTextColor color="subdued">
-                  <p>{`Got questions? We're here to help.`}</p>
-                </EuiTextColor>
-              </EuiText>
-            </EuiPopoverFooter>
-          </div>
-        </>
-      ) : (
-        <div css={popoverContainerCss}>
-          <EuiTitle size="s">
-            <h3>Choose guide</h3>
-          </EuiTitle>
-
-          <EuiText>
-            <p>Step-by-step setup of Elastic here.</p>
+              {/* Do not show horizontal rule for last item */}
+              {onboardingSteps.length - 1 !== index && <EuiHorizontalRule />}
+            </div>
+          );
+        })}
+        <EuiPopoverFooter>
+          <EuiText size="xs" textAlign="center">
+            <EuiTextColor color="subdued">
+              <p>{`Got questions? We're here to help.`}</p>
+            </EuiTextColor>
           </EuiText>
-
-          <EuiSpacer />
-
-          <EuiFlexGroup direction="column" gutterSize="s" alignItems="baseline">
-            <EuiFlexItem grow={false}>
-              <EuiCard
-                icon={<EuiIcon size="m" type="logoSiteSearch" />}
-                title="Search my data"
-                description="Create a search experience for your websites, applications, workplace content, or anything in between."
-                onClick={() => setSelectedGuide('search')}
-              />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiCard
-                icon={<EuiIcon size="m" type="logoObservability" />}
-                title="Monitor my infrastructure"
-                description="Monitor your infrastructure by consolidating your logs metrics, and traces for end-to-end observability."
-                onClick={() => setSelectedGuide('observability')}
-              />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiCard
-                icon={<EuiIcon size="m" type="logoSecurity" />}
-                title="Protect my environment"
-                description="Protect your environment by unifying SIEM, endpoint security, and cloud security to protect against threats."
-                onClick={() => setSelectedGuide('security')}
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </div>
-      )}
+        </EuiPopoverFooter>
+      </div>
     </EuiPopover>
   );
 };

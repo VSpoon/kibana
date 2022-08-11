@@ -73,6 +73,7 @@ export interface HeaderProps {
   isLocked$: Observable<boolean>;
   loadingCount$: ReturnType<HttpStart['getLoadingCount$']>;
   onIsLockedUpdate: OnIsLockedUpdate;
+  http: HttpStart;
 }
 
 export function Header({
@@ -83,6 +84,7 @@ export function Header({
   onIsLockedUpdate,
   homeHref,
   breadcrumbsAppendExtension$,
+  http,
   ...observables
 }: HeaderProps) {
   const isVisible = useObservable(observables.isVisible$, false);
@@ -141,7 +143,7 @@ export function Header({
                   <EuiHideFor sizes={['m', 'l', 'xl']}>
                     <HeaderNavControls navControls$={observables.navControlsCenter$} />
                   </EuiHideFor>,
-                  <HeaderOnboardingButton />,
+                  <HeaderOnboardingButton http={http} />,
                   <HeaderHelpMenu
                     helpExtension$={observables.helpExtension$}
                     helpSupportUrl$={observables.helpSupportUrl$}

@@ -12,7 +12,7 @@ import { BrowserRouter as Router } from 'react-router-dom';
 
 import {
   EuiButton,
-  EuiHorizontalRule,
+  EuiSpacer,
   EuiPage,
   EuiPageBody,
   EuiPageContent,
@@ -21,6 +21,11 @@ import {
   EuiPageHeader,
   EuiTitle,
   EuiText,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFormRow,
+  EuiFieldNumber,
+  EuiSelect,
 } from '@elastic/eui';
 
 import { CoreStart } from '@kbn/core/public';
@@ -42,9 +47,10 @@ export const GuidedOnboardingApp = ({
   navigation,
 }: GuidedOnboardingAppDeps) => {
   // Use React hooks to manage state.
-  const [guidedOnboardingState, setGuidedOnboardingState] = useState<string | undefined>();
+  const [selectedGuide, setSelectedGuide] = useState<string | undefined>(undefined);
+  const [selectedStep, setSelectedStep] = useState<number | undefined>(undefined);
 
-  const onClickHandler = () => {
+  const getDataRequest = () => {
     // Use the core http service to make a response to the server API.
     http.get('/api/guided_onboarding/state').then((res) => {
       // Use the core notifications service to display a success message.
@@ -53,7 +59,8 @@ export const GuidedOnboardingApp = ({
           defaultMessage: 'Data loaded',
         })
       );
-      setGuidedOnboardingState(JSON.stringify(res, null, 2));
+      setSelectedGuide(res.state.active_guide);
+      setSelectedStep(res.state.active_step);
     });
   };
 
@@ -62,8 +69,8 @@ export const GuidedOnboardingApp = ({
     http
       .put('/api/guided_onboarding/state', {
         body: JSON.stringify({
-          active_guide: 'observability',
-          active_step: 1,
+          active_guide: selectedGuide,
+          active_step: selectedStep,
         }),
       })
       .then((res) => {
@@ -73,7 +80,6 @@ export const GuidedOnboardingApp = ({
             defaultMessage: 'Data updated',
           })
         );
-        setGuidedOnboardingState(JSON.stringify(res, null, 2));
       });
   };
 
@@ -94,7 +100,7 @@ export const GuidedOnboardingApp = ({
                 <EuiTitle size="l">
                   <h1>
                     <FormattedMessage
-                      id="guidedOnboarding.helloWorldText"
+                      id="guidedOnboarding.pluginName"
                       defaultMessage="{name}"
                       values={{ name: PLUGIN_NAME }}
                     />
@@ -106,8 +112,8 @@ export const GuidedOnboardingApp = ({
                   <EuiTitle>
                     <h2>
                       <FormattedMessage
-                        id="guidedOnboarding.congratulationsTitle"
-                        defaultMessage="Congratulations, you have successfully created a new Kibana Plugin!"
+                        id="guidedOnboarding.title"
+                        defaultMessage="Saved objects POC"
                       />
                     </h2>
                   </EuiTitle>
@@ -116,32 +122,49 @@ export const GuidedOnboardingApp = ({
                   <EuiText>
                     <p>
                       <FormattedMessage
-                        id="guidedOnboarding.content"
-                        defaultMessage="Look through the generated code and check out the plugin development documentation."
-                      />
-                    </p>
-                    <EuiHorizontalRule />
-                    <p>
-                      <FormattedMessage
                         id="guidedOnboarding.timestampText"
                         defaultMessage="State: {state}"
-                        values={{ state: guidedOnboardingState ?? 'Unknown' }}
+                        values={{
+                          state: `guide: ${selectedGuide}, step: ${selectedStep}` ?? 'Unknown',
+                        }}
                       />
                     </p>
-                    <EuiButton type="primary" size="s" onClick={onClickHandler}>
-                      <FormattedMessage
-                        id="guidedOnboarding.buttonText"
-                        defaultMessage="Get data"
-                      />
-                    </EuiButton>
-
-                    <EuiButton type="secondary" size="s" onClick={sendUpdateRequest}>
-                      <FormattedMessage
-                        id="guidedOnboarding.buttonText"
-                        defaultMessage="Update data"
-                      />
-                    </EuiButton>
                   </EuiText>
+                  <EuiSpacer />
+                  <EuiButton type="primary" size="s" onClick={getDataRequest}>
+                    <FormattedMessage id="guidedOnboarding.buttonText" defaultMessage="Get data" />
+                  </EuiButton>
+                  <EuiSpacer />
+                  <EuiFlexGroup style={{ maxWidth: 600 }}>
+                    <EuiFlexItem>
+                      <EuiFormRow label="Guide" helpText="Select a guide">
+                        <EuiSelect
+                          id={'guideSelect'}
+                          options={[
+                            { value: 'observability', text: 'observability' },
+                            { value: 'security', text: 'security' },
+                            { value: 'search', text: 'search' },
+                            { value: '', text: 'unset' },
+                          ]}
+                          value={selectedGuide}
+                          onChange={(e) => setSelectedGuide(e.target.value)}
+                        />
+                      </EuiFormRow>
+                    </EuiFlexItem>
+                    <EuiFlexItem>
+                      <EuiFormRow label="Step">
+                        <EuiFieldNumber
+                          value={selectedStep}
+                          onChange={(e) => setSelectedStep(Number(e.target.value))}
+                        />
+                      </EuiFormRow>
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false}>
+                      <EuiFormRow hasEmptyLabelSpace>
+                        <EuiButton onClick={sendUpdateRequest}>Save</EuiButton>
+                      </EuiFormRow>
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
                 </EuiPageContentBody>
               </EuiPageContent>
             </EuiPageBody>

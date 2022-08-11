@@ -36,7 +36,7 @@ export function defineRoutes(router: IRouter) {
           guidedSetupSavedObjectsId
         );
         return response.ok({
-          body: { attributes: guidedSetupSO.attributes },
+          body: { state: guidedSetupSO.attributes },
         });
       }
       return response.ok({

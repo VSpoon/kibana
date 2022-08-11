@@ -10,8 +10,8 @@ import { SavedObjectsType } from '@kbn/core/server';
 export const guidedSetupSavedObjectsType = 'GUIDED_SETUP_SAVED_OBJECTS_TYPE';
 export const guidedSetupSavedObjectsId = 'GUIDED_SETUP_SAVED_OBJECTS_ID';
 export const guidedSetupDefaultState = {
-  active_guide: 'security',
-  active_step: 0,
+  active_guide: null,
+  active_step: null,
 };
 export const guidedSetupSavedObjects: SavedObjectsType = {
   name: guidedSetupSavedObjectsType,
